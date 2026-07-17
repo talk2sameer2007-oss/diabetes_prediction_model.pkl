@@ -6,9 +6,9 @@ import joblib
 deployed_dt = joblib.load('diabetes_prediction_model2.pkl')
 
 # --- CODE BLOCK: PREDICTION LOGIC FOR 5 FEATURES ---
-def predict_diabetes(Pregnancies, PlasmaGlucose, DiastolicBloodPressure,TricepsThickness, SerumInsulin, BMI, Age):
+def predict_diabetes(Pregnancies, PlasmaGlucose, DiastolicBloodPressure,TricepsThickness, SerumInsulin, BMI, DiabetesPedigree, Age):
     # The model expects a 2D array matching the exact order of x_train
-    input_data = [[Pregnancies, PlasmaGlucose, DiastolicBloodPressure,TricepsThickness, SerumInsulin, BMI, Age]]
+    input_data = [[Pregnancies, PlasmaGlucose, DiastolicBloodPressure,TricepsThickness, SerumInsulin, BMI, DiabetesPedigree, Age]]
     prediction = deployed_dt.predict(input_data)
     
     # Interpret the binary outcome (typically 1 for positive, 0 for negative)
@@ -28,6 +28,7 @@ interface = gr.Interface(
         gr.Number(label="Triceps Skin Fold Thickness (mm)"),
         gr.Number(label="Serum Insulin (mu U/mL)"),
         gr.Number(label="Body Mass Index (kg/m^2)"),
+        gr.number(label="Diabetes Pedigree Function"),
         gr.Number(label="Age (Years)")
     ],
     outputs=gr.Text(label="Assessment Result"),
