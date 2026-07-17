@@ -28,7 +28,7 @@ interface = gr.Interface(
         gr.Number(label="Triceps Skin Fold Thickness (mm)"),
         gr.Number(label="Serum Insulin (mu U/mL)"),
         gr.Number(label="Body Mass Index (kg/m^2)"),
-        gr.number(label="Diabetes Pedigree Function"),
+        gr.Number(label="Diabetes Pedigree Function"),
         gr.Number(label="Age (Years)")
     ],
     outputs=gr.Text(label="Assessment Result"),
