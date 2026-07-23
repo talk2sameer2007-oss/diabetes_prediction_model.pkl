@@ -5,7 +5,7 @@ import gradio as gr
 import joblib
 
 # Load the trained Decision Tree model at startup
-deployed_dt = joblib.load('diabetes_prediction_model(1).pkl')
+deployed_dt = joblib.load('diabetes_prediction_model (1).pkl')
 
 def predict_diabetes(pregnancies, glucose, insulin, bmi, age):
     # The model expects a 2D array matching the exact order of x_train
