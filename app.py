@@ -1,52 +1,222 @@
 # app.py
 
 import os
+import joblib
+import gradio as gr
+
+# ==========================================================
+# Load the trained model
+# ==========================================================
+try:
+    deployed_dt = joblib.load("diabetes_prediction_model2.pkl")
+except Exception as e:
+    print(f"Warning: Model not found or error loading. {e}")
+    deployed_dt = None
+
+# ==========================================================
+# Prediction Function
+# ==========================================================
+def predict_diabetes(
+    Pregnancies,
+    PlasmaGlucose,
+    DiastolicBloodPressure,
+    TricepsThickness,
+    SerumInsulin,
+    BMI,
+    Age,
+):
+
+    values = [
+        Pregnancies,
+        PlasmaGlucose,
+        DiastolicBloodPressure,
+        TricepsThickness,
+        SerumInsulin,
+        BMI,
+        Age,
+    ]
+
+    # Empty input check
+    if any(v is None or str(v).strip() == "" for v in values):
+        return "❌ Please fill in all the input fields."
+
+    # Convert data types
+    try:
+        Pregnancies = int(Pregnancies)
+        PlasmaGlucose = float(PlasmaGlucose)
+        DiastolicBloodPressure = float(DiastolicBloodPressure)
+        TricepsThickness = float(TricepsThickness)
+        SerumInsulin = float(SerumInsulin)
+        BMI = float(BMI)
+        Age = int(Age)
+    except (ValueError, TypeError):
+        return "❌ Please enter valid numeric values."
+
+    # Negative value check
+    if any(v < 0 for v in [
+        Pregnancies, PlasmaGlucose, DiastolicBloodPressure, 
+        TricepsThickness, SerumInsulin, BMI, Age
+    ]):
+        return "❌ Negative values are not allowed."
+
+    # Range validation
+    if Pregnancies > 20: return "❌ Pregnancies should be between 0 and 20."
+    if PlasmaGlucose > 300: return "❌ Plasma Glucose should be between 0 and 300."
+    if DiastolicBloodPressure > 200: return "❌ Blood Pressure should be between 0 and 200."
+    if TricepsThickness > 100: return "❌ Triceps Thickness should be between 0 and 100."
+    if SerumInsulin > 1000: return "❌ Serum Insulin should be between 0 and 1000."
+    if BMI > 70: return "❌ BMI should be between 0 and 70."
+    if Age > 120: return "❌ Age should be between 0 and 120."
+
+    if deployed_dt is None:
+        return "❌ Model failed to load. Please check your .pkl file."
+
+    try:
+        input_data = [[
+            Pregnancies,
+            PlasmaGlucose,
+            DiastolicBloodPressure,
+            TricepsThickness,
+            SerumInsulin,
+            BMI,
+            Age,
+        ]]
+
+        prediction = deployed_dt.predict(input_data)
+
+        if prediction[0] == 1:
+            return (
+                "🔴 Prediction Result\n\n"
+                "High Risk of Diabetes (Positive)\n\n"
+                "Please consult a healthcare professional."
+            )
+        else:
+            return (
+                "🟢 Prediction Result\n\n"
+                "Low Risk of Diabetes (Negative)\n\n"
+                "Maintain a healthy lifestyle."
+            )
+
+    except Exception as e:
+        return f"❌ Prediction failed.\n\nError: {str(e)}"
+
+# ==========================================================
+# Description
+# ==========================================================
+DESCRIPTION = """
+# 🩺 Diabetes Prediction System
+
+This application predicts whether a patient is at *High Risk* or *Low Risk* of Diabetes using a trained *Decision Tree Machine Learning Model*.
+
+---
+
+## 👩‍💻 Developed By
+*Sameer*
+
+---
+
+## 🏫 College
+*Panipat Institute of Engineering & Technology (PIET), Panipat*
+
+---
+
+## 🛠️ Tools & Technologies
+* Python
+* Machine Learning
+* Decision Tree Classifier
+* Scikit-learn
+* Pandas
+* NumPy
+* Joblib
+* Gradio
+* Git & GitHub
+
+---
+
+## 📌 Input Parameters
+* Pregnancies
+* Plasma Glucose
+* Diastolic Blood Pressure
+* Triceps Skin Fold Thickness
+* Serum Insulin
+* Body Mass Index (BMI)
+* Age
+"""
+
+# ==========================================================
+# Interface
+# ==========================================================
+# --- CODE BLOCK: REMOVED ALLOW_FLAGGING ---
+interface = gr.Interface(
+    fn=predict_diabetes,
+    inputs=[
+        gr.Number(label="Pregnancies"),
+        gr.Number(label="Plasma Glucose"),
+        gr.Number(label="Diastolic Blood Pressure"),
+        gr.Number(label="Triceps Skin Fold Thickness"),
+        gr.Number(label="Serum Insulin"),
+        gr.Number(label="Body Mass Index (BMI)"),
+        gr.Number(label="Age"),
+    ],
+    outputs=gr.Textbox(
+        label="Assessment Result",
+        lines=6,
+    ),
+    title="🩺 Diabetes Prediction System",
+    description=DESCRIPTION,
+)
+# ------------------------------------------
+
+# ==========================================================
+# Launch
+# ==========================================================
+if __name__ == "__main__":
+    interface.launch(
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", 7860)),
+    )
+import os
 import gradio as gr
 import joblib
 
 # Load the trained Decision Tree model at startup
-deployed_dt = joblib.load('diabetes_prediction_model (1).pkl')
+deployed_dt = joblib.load('Diabetes_Prediction45.pkl')
 
-def predict_diabetes(pregnancies, glucose, insulin, bmi, age):
+# --- CODE BLOCK: PREDICTION LOGIC FOR 5 FEATURES ---
+def predict_diabetes(Pregnancies, PlasmaGlucose, DiastolicBloodPressure,TricepsThickness, SerumInsulin, BMI, Age):
     # The model expects a 2D array matching the exact order of x_train
-    input_data = [[pregnancies, glucose, insulin, bmi, age]]
+    input_data = [[Pregnancies, PlasmaGlucose, DiastolicBloodPressure,TricepsThickness, SerumInsulin, BMI, Age]]
     prediction = deployed_dt.predict(input_data)
     
-    # Interpret the binary outcome
+    # Interpret the binary outcome (typically 1 for positive, 0 for negative)
     if prediction[0] == 1:
         return "Prediction: High Risk of Diabetes (Positive)"
     else:
         return "Prediction: Low Risk of Diabetes (Negative)"
+# ---------------------------------------------------
 
-# --- CODE BLOCK: ADDED FOOTER INFO AND ARTICLE PARAMETER ---
-developer_info = """
-### About the Developer
-**Created by:** Sameer
-* **Roll No:** 241020
-
----
-### 🛠️ Tools & Technologies Used
-* **Machine Learning:** Scikit-learn (Decision Tree Classifier)
-* **Web Framework:** Gradio
-* **Language:** Python
-* **Deployment:** Render
-"""
-
+# --- CODE BLOCK: GRADIO INTERFACE SETUP ---
 interface = gr.Interface(
     fn=predict_diabetes,
     inputs=[
         gr.Number(label="Pregnancies (Number of times pregnant)"),
-        gr.Number(label="Glucose (Plasma glucose concentration)"),
-        gr.Number(label="Insulin (2-Hour serum insulin)"),
-        gr.Number(label="BMI (Body mass index)"),
+        gr.Number(label="Plasma Glucose (mg/dL)"),
+        gr.Number(label="Diastolic Blood Pressure (mm Hg)"),
+        gr.Number(label="Triceps Skin Fold Thickness (mm)"),
+        gr.Number(label="Serum Insulin (mu U/mL)"),
+        gr.Number(label="Body Mass Index (kg/m^2)"),
         gr.Number(label="Age (Years)")
     ],
     outputs=gr.Text(label="Assessment Result"),
     title="Diabetes Prediction System",
-    description="Enter the medical metrics to predict diabetes risk using a Decision Tree Machine Learning model.",
-    article=developer_info
+    description="""
+    <h3> Project by Vansh - PIET (241047)</h3>
+    <p>Enter the medical metrics to predict diabetes risk using a Decision Tree Machine Learning model.</p>
+    """
 )
-# -----------------------------------------------------------
+
+# ------------------------------------------
 
 if __name__ == "__main__":
+    # Render network configuration
     interface.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 7860)))
